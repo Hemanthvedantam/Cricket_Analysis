@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cricket Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #6366f1;
+            --accent-color: #10b981;
+            --dark-bg: #1e293b;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-muted: #64748b;
+            --text-dark: #334155;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        }
+
+        body {
+            background: var(--light-bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .cricket-bg {
+            position: fixed;
+            right: -50px;
+            bottom: -50px;
+            z-index: -1;
+            opacity: 0.15;
+            height: 80vh;
+            transform: rotate(25deg);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            padding: 2rem;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+            z-index: 0;
+        }
+
+        .dashboard-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.025em;
+        }
+
+        .dashboard-section {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-section:hover {
+            transform: translateY(-3px);
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.75rem;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .metric-card:hover::before {
+            width: 8px;
+        }
+
+        .metric-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--dark-bg);
+            letter-spacing: -0.025em;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.85rem;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--border-color);
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+        }
+
+        .player-header {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-indicator {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .radar-chart-container {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 3rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            display: none;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 0.25em solid var(--primary-color);
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .dashboard-header {
+                padding: 3rem 1.5rem;
+                border-radius: 1rem;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2.25rem;
+            }
+            
+            .metric-value {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Virat_Kohli.jpg" 
+         class="cricket-bg"
+         alt="Cricket Background"
+         style="filter: grayscale(100%) contrast(200%);">
+
+    <div class="container">
+        <header class="dashboard-header text-center">
+            <h1 class="mb-4">🏏 Advanced Cricket Analytics</h1>
+            <p class="opacity-90 fs-5">Performance Insights & Player Comparison System
+                    Cricket is a GentleMan Game
+            </p>
+        </header>
+
+        <!-- Single Player Analysis Section -->
+        <section class="dashboard-section">
+            <h3 class="mb-4">🔍 Individual Player Analysis</h3>
+            <form method="POST" onsubmit="showLoading()">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted">Format</label>
+                        <select name="single_format" class="form-select">
+                            <option value="ODI">ODI</option>
+                            <option value="T20">T20</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Player Name</label>
+                        <input type="text" name="single_player" class="form-control" 
+                               placeholder="Enter player name" required
+                               value="{{ request.form.get('single_player', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" name="single_submit" 
+                                class="btn btn-primary w-100">
+                            <i class="fas fa-chart-line me-2"></i>Analyze
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            {% if single_stats %}
+            <hr class="my-5">
+            <div class="player-header">
+                <div class="color-indicator" style="background: var(--primary-color)"></div>
+                <div>
+                    {{ request.form.get('single_player', 'Unknown Player') }}
+                    <span class="badge bg-accent text-dark ms-2">Batsman</span>
+                </div>
+            </div>
+            <div class="row g-4">
+                {% for key, value in single_stats.items() %}
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <i class="metric-icon fas fa-{{ 'running' if 'Strike' in key else 'baseball' if 'Average' in key else 'tachometer-alt' }}"></i>
+                        <div class="metric-label">{{ key }}</div>
+                        <div class="metric-value">
+                            {% if value is number %}
+                                {{ "%.2f"|format(value) }}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </div>
+                        <div class="mt-3">
+                            <span class="stat-badge">
+                                <i class="fas fa-trophy me-1"></i>
+                                Top 10%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if radar_img %}
+            <div class="radar-chart-container mt-5">
+                <h5 class="mb-4"><i class="fas fa-chart-radar me-2"></i>Performance Radar Analysis</h5>
+                <img src="data:image/png;base64,{{ radar_img }}" class="img-fluid rounded-3">
+            </div>
+            {% endif %}
+            {% endif %}
+        </section>
+
+        <!-- Player Comparison Section -->
+        <section class="dashboard-section">
+            <h3 class="mb-4">🆚 Player Comparison</h3>
+            <form method="POST" onsubmit="showLoading()">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label text-muted">Format</label>
+                        <select name="compare_format" class="form-select">
+                            <option value="ODI">ODI</option>
+                            <option value="T20">T20</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted">Player 1</label>
+                        <input type="text" name="player1" class="form-control" 
+                               placeholder="Enter player name" required
+                               value="{{ request.form.get('player1', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted">Player 2</label>
+                        <input type="text" name="player2" class="form-control" 
+                               placeholder="Enter player name" required
+                               value="{{ request.form.get('player2', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" name="compare_submit" 
+                                class="btn btn-primary w-100">
+                            <i class="fas fa-balance-scale me-2"></i>Compare
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            {% if players and colors %}
+            <hr class="my-5">
+            <div class="row g-5">
+                {% for player in players %}
+                <div class="col-md-6">
+                    <div class="comparison-player">
+                        <div class="player-header">
+                            <div class="color-indicator" style="background:  colors[loopindex0] "></div>
+                            <div>
+                                {{ player }}
+                                <span class="badge bg-accent text-dark ms-2">{{ 'Bowler' if loop.index0 else 'Batsman' }}</span>
+                            </div>
+                        </div>
+                        {% if compare_stats and compare_stats[loop.index0] %}
+                        <div class="row g-3">
+                            {% for value in compare_stats[loop.index0] %}
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <i class="metric-icon fas fa-{{ 'fire' if loop.index0 == 0 else 'bolt' }}"></i>
+                                    <div class="metric-label">Metric {{ loop.index }}</div>
+                                    <div class="metric-value">{{ "%.2f"|format(value) }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning mt-3">Player data not available</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if radar_img and compare_stats and none not in compare_stats %}
+            <div class="radar-chart-container mt-5">
+                <h5 class="mb-4"><i class="fas fa-chart-network me-2"></i>Comparative Performance Analysis</h5>
+                <img src="data:image/png;base64,{{ radar_img }}" class="img-fluid rounded-3">
+            </div>
+            {% endif %}
+            {% endif %}
+            {% if bar_img %}
+<div class="radar-chart-container mt-4">
+    <h5 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Performance Comparison</h5>
+    <img src="data:image/png;base64,{{ bar_img }}" class="img-fluid">
+</div>
+{% endif %}
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showLoading() {
+            document.querySelector('.loading-overlay').style.display = 'flex';
+        }
+        window.addEventListener('scroll', () => {
+            const bg = document.querySelector('.cricket-bg');
+            const scrolled = window.pageYOffset;
+            bg.style.transform = `rotate(25deg) translateY(${scrolled * 0.3}px)`;
+        });
+        // Hide loading when page finishes loading
+        window.addEventListener('load', () => {
+            document.querySelector('.loading-overlay').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
